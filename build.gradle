@@ -79,7 +79,10 @@ dependencies {
     implementation 'software.amazon.awssdk:sagemaker'
     implementation 'software.amazon.awssdk:lambda'
     implementation 'software.amazon.awssdk:iam'
-    implementation 'software.amazon.randomcutforest:randomcutforest-core:4.0.0'
+    implementation 'software.amazon.awssdk:sagemakerruntime'
+    implementation 'software.amazon.awssdk:sagemakergeospatial'
+    implementation 'software.amazon.awssdk:secretsmanager'
+    implementation 'io.github.cdimascio:dotenv-java:2.2.0'
     testImplementation platform('org.junit:junit-bom:5.7.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 //    implementation 'org.junit.jupiter:junit-jupiter-commons'
