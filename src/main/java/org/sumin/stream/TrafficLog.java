@@ -18,8 +18,11 @@ public class TrafficLog {
     public String vpcId;
     public String subnetId;
     public String interfaceId;
-    public String start;
-    public String end;
+    public String logStatus;
+    public int packets;
+    public int bytes;
+    public long start;
+    public long end;
     public String eventTime;
     public Long getTime() throws ParseException {
         SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS Z");
@@ -29,7 +32,10 @@ public class TrafficLog {
     public String toString() {
         return "Log vpcId: " + this.vpcId +
                 " Log subnetId: " + this.subnetId +
-                " Log interfaceId: " + this.eventTime +
+                " Log interfaceId: " + this.interfaceId +
+                " Log logStatus: " + this.logStatus +
+                " Log packets: " + this.packets +
+                " Log bytes: " + this.bytes +
                 " Log start: " + this.start +
                 " Log end: " + this.end +
                 " Log eventTime: " + this.eventTime;
