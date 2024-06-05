@@ -22,6 +22,8 @@ public class TrafficLog {
     @TypeInfo(PacketTypeInfo.class)
     public List<Integer> packets;
     public String start;
+    @TypeInfo(PacketTypeInfo.class)
+    public List<Integer> scores;
     public Long getTime() throws ParseException {
         SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS Z");
         setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -32,6 +34,7 @@ public class TrafficLog {
                 " Log subnetId: " + this.subnetId +
                 " Log interfaceId: " + this.interfaceId +
                 " Log packets: " + this.packets +
-                " Log start: " + this.start;
+                " Log start: " + this.start +
+                " Log scores: " + this.scores;
     }
 }
