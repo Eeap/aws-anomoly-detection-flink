@@ -22,12 +22,11 @@ public class TrafficLogSource {
     public int bytes;
     public long start;
     public long end;
-    public String eventTime;
-    public Long getTime() throws ParseException {
-        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS Z");
-        setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-        return setTime.parse(this.eventTime).toInstant().toEpochMilli();
-    }
+//    public Long getTime() throws ParseException {
+//        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS Z");
+//        setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+//        return setTime.parse(this.eventTime).toInstant().toEpochMilli();
+//    }
     public String toString() {
         return "Log vpcId: " + this.vpcId +
                 " Log subnetId: " + this.subnetId +
@@ -36,7 +35,6 @@ public class TrafficLogSource {
                 " Log packets: " + this.packets +
                 " Log bytes: " + this.bytes +
                 " Log start: " + this.start +
-                " Log end: " + this.end +
-                " Log eventTime: " + this.eventTime;
+                " Log end: " + this.end;
     }
 }

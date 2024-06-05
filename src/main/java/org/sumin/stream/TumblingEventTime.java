@@ -44,11 +44,7 @@ public class TumblingEventTime {
                         WatermarkStrategy
                                 .<TrafficLogSource>forBoundedOutOfOrderness(Duration.ofSeconds(5))
                                 .withTimestampAssigner((log, timestamp) -> {
-                                    try {
-                                        return log.getTime();
-                                    } catch (ParseException e) {
-                                        throw new RuntimeException(e);
-                                    }
+                                    return log.getStart();
                                 }))
                 .keyBy(new KeySelector<TrafficLogSource, Tuple3<String,String,String>>() {
                     @Override
