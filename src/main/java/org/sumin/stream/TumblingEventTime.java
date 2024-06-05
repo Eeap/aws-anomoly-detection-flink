@@ -2,6 +2,8 @@ package org.sumin.stream;
 
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.formats.json.JsonDeserializationSchema;
 import org.apache.flink.kinesis.shaded.org.apache.flink.connector.aws.config.AWSConfigConstants;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -35,12 +37,12 @@ public class TumblingEventTime {
         consumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, System.getenv("STREAM_INITIAL_POSITION"));
 
         // Streaming Source
-        DataStreamSource<TrafficLog> source = env.addSource(new FlinkKinesisConsumer<>("stream_name", new JsonDeserializationSchema<>(TrafficLog.class), consumerConfig));
+        DataStreamSource<TrafficLogSource> source = env.addSource(new FlinkKinesisConsumer<>("test-stream", new JsonDeserializationSchema<>(TrafficLogSource.class), consumerConfig));
 
         // Tumbling Event Time Window
         source.assignTimestampsAndWatermarks(
                         WatermarkStrategy
-                                .<TrafficLog>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+                                .<TrafficLogSource>forBoundedOutOfOrderness(Duration.ofSeconds(5))
                                 .withTimestampAssigner((log, timestamp) -> {
                                     try {
                                         return log.getTime();
@@ -48,7 +50,12 @@ public class TumblingEventTime {
                                         throw new RuntimeException(e);
                                     }
                                 }))
-                .keyBy(log -> log.interfaceId)
+                .keyBy(new KeySelector<TrafficLogSource, Tuple3<String,String,String>>() {
+                    @Override
+                    public Tuple3<String, String, String> getKey(TrafficLogSource trafficLogSource) throws Exception {
+                        return Tuple3.of(trafficLogSource.vpcId, trafficLogSource.subnetId, trafficLogSource.interfaceId);
+                    }
+                })
                 .window(TumblingEventTimeWindows.of(Time.seconds(10)))
                 .process(new EventProcessWindowFunction())
                 .print();
