@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.flink.kinesis.shaded.com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -13,7 +15,8 @@ import java.util.TimeZone;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrafficLogSource {
+@JsonPropertyOrder({"vpcId","subnetId","interfaceId","logStatus","packets","bytes","start","end"})
+public class TrafficLogSource implements Serializable {
     public String vpcId;
     public String subnetId;
     public String interfaceId;
@@ -23,10 +26,11 @@ public class TrafficLogSource {
     public long start;
     public long end;
 //    public Long getTime() throws ParseException {
-//        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS Z");
+//        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 //        setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 //        return setTime.parse(this.eventTime).toInstant().toEpochMilli();
 //    }
+    @Override
     public String toString() {
         return "Log vpcId: " + this.vpcId +
                 " Log subnetId: " + this.subnetId +
@@ -36,5 +40,9 @@ public class TrafficLogSource {
                 " Log bytes: " + this.bytes +
                 " Log start: " + this.start +
                 " Log end: " + this.end;
+    }
+    @Override
+    public int hashCode() {
+        return this.vpcId.hashCode() + this.subnetId.hashCode() + this.interfaceId.hashCode();
     }
 }

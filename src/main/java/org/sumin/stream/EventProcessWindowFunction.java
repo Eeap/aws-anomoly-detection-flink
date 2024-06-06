@@ -74,7 +74,7 @@ public class EventProcessWindowFunction extends ProcessWindowFunction<TrafficLog
     }
 
     private boolean checkTimeOut(ProcessWindowFunction<TrafficLogSource, TrafficLog, Tuple3<String, String, String>, TimeWindow>.Context context) {
-        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS Z");
+        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
         // timer check
         if (startTime != null) {

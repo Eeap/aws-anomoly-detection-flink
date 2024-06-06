@@ -13,7 +13,6 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
 import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Properties;
@@ -26,7 +25,7 @@ public class TumblingEventTime {
     }
     public JobExecutionResult execute() throws Exception {
         // Timezone setting
-        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS Z");
+        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
         // kinesis consumer config
@@ -39,6 +38,28 @@ public class TumblingEventTime {
         // Streaming Source
         DataStreamSource<TrafficLogSource> source = env.addSource(new FlinkKinesisConsumer<>("test-stream", new JsonDeserializationSchema<>(TrafficLogSource.class), consumerConfig));
 
+        /** test source code
+         *         DataStreamSource<TrafficLogSource> source = env.addSource(new SourceFunction<TrafficLogSource>() {
+         *             @Override
+         *             public void run(SourceContext<TrafficLogSource> sourceContext) throws Exception {
+         *                 SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+         *                 setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+         *
+         *                 while (true) {
+         *                     for (int i = 0; i < 10; i++) {
+         *                         sourceContext.collect(new TrafficLogSource("vpc-"+i, "subnet-"+i, "interface-"+i, null,1,1024, System.currentTimeMillis(), System.currentTimeMillis(), setTime.format(System.currentTimeMillis())));
+         *                     }
+         *                     Thread.sleep(1000);
+         *                 }
+         *             }
+         *
+         *             @Override
+         *             public void cancel() {
+         *
+         *             }
+         *         });
+         *
+         * **/
         // Tumbling Event Time Window
         source.assignTimestampsAndWatermarks(
                         WatermarkStrategy
