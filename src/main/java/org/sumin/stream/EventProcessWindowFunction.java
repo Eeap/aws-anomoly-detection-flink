@@ -55,8 +55,6 @@ public class EventProcessWindowFunction extends ProcessWindowFunction<TrafficLog
 //            trafficLog.scores.add(result);
             // sink trafficLog
             collector.collect(trafficLog);
-        }
-        else {
             // clear traffic state
             trafficState.clear();
             startTime = null;
