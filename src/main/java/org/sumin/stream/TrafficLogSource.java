@@ -9,6 +9,7 @@ import org.apache.flink.kinesis.shaded.com.fasterxml.jackson.annotation.JsonProp
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 @Getter
@@ -25,11 +26,13 @@ public class TrafficLogSource implements Serializable {
     public int bytes;
     public long start;
     public long end;
-//    public Long getTime() throws ParseException {
+    public Long getTime() throws ParseException {
 //        SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 //        setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-//        return setTime.parse(this.eventTime).toInstant().toEpochMilli();
-//    }
+//        System.out.println(setTime.format(new Date(this.start*1000L)));
+//        System.out.println(setTime.format(new Date(System.currentTimeMillis())));
+        return this.start * 1000L;
+    }
     @Override
     public String toString() {
         return "Log vpcId: " + this.vpcId +

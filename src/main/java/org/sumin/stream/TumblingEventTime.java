@@ -14,8 +14,10 @@ import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
 import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
 import org.apache.flink.streaming.connectors.kinesis.serialization.KinesisDeserializationSchema;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -68,17 +70,24 @@ public class TumblingEventTime {
         // Tumbling Event Time Window
         source.assignTimestampsAndWatermarks(
                         WatermarkStrategy
-                                .<TrafficLogSource>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+                                .<TrafficLogSource>forMonotonousTimestamps()
+                                .withIdleness(Duration.ofSeconds(20))
                                 .withTimestampAssigner((log, timestamp) -> {
-                                    return log.getStart();
+                                    try {
+                                        return log.getTime();
+                                    } catch (ParseException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }))
                 .keyBy(new KeySelector<TrafficLogSource, Tuple3<String,String,String>>() {
                     @Override
                     public Tuple3<String, String, String> getKey(TrafficLogSource trafficLogSource) throws Exception {
+//                        System.out.println("key By TrafficLogSource: " + trafficLogSource.toString());
                         return Tuple3.of(trafficLogSource.vpcId, trafficLogSource.subnetId, trafficLogSource.interfaceId);
                     }
                 })
-                .window(TumblingEventTimeWindows.of(Time.seconds(10)))
+                .window(TumblingEventTimeWindows.of(Time.seconds(60)))
+                .allowedLateness(Time.seconds(10))
                 .process(new EventProcessWindowFunction())
                 .print();
         return env.execute("anomoly detection flink Job");
