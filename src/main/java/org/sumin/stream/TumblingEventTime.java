@@ -1,10 +1,10 @@
 package org.sumin.stream;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.formats.json.JsonDeserializationSchema;
 import org.apache.flink.kinesis.shaded.org.apache.flink.connector.aws.config.AWSConfigConstants;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -12,6 +12,7 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindo
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
 import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
+import org.apache.flink.streaming.connectors.kinesis.serialization.KinesisDeserializationSchema;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -20,8 +21,10 @@ import java.util.TimeZone;
 
 public class TumblingEventTime {
     public StreamExecutionEnvironment env;
+    private Dotenv dotenv;
     public TumblingEventTime(StreamExecutionEnvironment env) {
         this.env = env;
+        this.dotenv = Dotenv.load();
     }
     public JobExecutionResult execute() throws Exception {
         // Timezone setting
@@ -30,13 +33,15 @@ public class TumblingEventTime {
 
         // kinesis consumer config
         Properties consumerConfig = new Properties();
-        consumerConfig.put(AWSConfigConstants.AWS_REGION, System.getenv("AWS_REGION"));
-        consumerConfig.put(AWSConfigConstants.AWS_ACCESS_KEY_ID, System.getenv("AWS_ACCESS_KEY_ID"));
-        consumerConfig.put(AWSConfigConstants.AWS_SECRET_ACCESS_KEY, System.getenv("AWS_SECRET_ACCESS_KEY"));
-        consumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, System.getenv("STREAM_INITIAL_POSITION"));
+        consumerConfig.put(AWSConfigConstants.AWS_REGION, dotenv.get("AWS_REGION"));
+        consumerConfig.put(AWSConfigConstants.AWS_ACCESS_KEY_ID, dotenv.get("AWS_ACCESS_KEY_ID"));
+        consumerConfig.put(AWSConfigConstants.AWS_SECRET_ACCESS_KEY, dotenv.get("AWS_SECRET_ACCESS_KEY"));
+        consumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, dotenv.get("STREAM_INITIAL_POSITION"));
 
         // Streaming Source
-        DataStreamSource<TrafficLogSource> source = env.addSource(new FlinkKinesisConsumer<>("test-stream", new JsonDeserializationSchema<>(TrafficLogSource.class), consumerConfig));
+        DataStreamSource<TrafficLogSource> source = env.addSource(new FlinkKinesisConsumer<>("test-stream"
+                , new KinesisStreamDeserializer()
+                , consumerConfig));
 
         /** test source code
          *         DataStreamSource<TrafficLogSource> source = env.addSource(new SourceFunction<TrafficLogSource>() {
