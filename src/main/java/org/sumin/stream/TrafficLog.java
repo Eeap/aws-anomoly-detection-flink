@@ -26,7 +26,7 @@ public class TrafficLog implements Serializable {
     public List<Integer> packets;
     public String start;
     @TypeInfo(PacketTypeInfo.class)
-    public List<Integer> scores;
+    public List<Double> scores;
     public Long getTime() throws ParseException {
         SimpleDateFormat setTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         setTime.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));

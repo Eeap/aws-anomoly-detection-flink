@@ -14,17 +14,21 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.TimeZone;
 
 public class EventProcessWindowFunction extends ProcessWindowFunction<TrafficLogSource, TrafficLog, Tuple3<String,String,String>, TimeWindow> {
     ValueState<TrafficLog> trafficState;
     String startTime;
+
     @Override
     public void process(Tuple3<String,String,String> key, ProcessWindowFunction<TrafficLogSource, TrafficLog, Tuple3<String,String,String>, TimeWindow>.Context context, Iterable<TrafficLogSource> iterable, Collector<TrafficLog> collector) throws Exception {
+
         trafficState = context.globalState().getState(new ValueStateDescriptor<>("trafficState", TrafficLog.class));
         int packetCnt = 0;
         // packet count
         for (TrafficLogSource trafficLogSource : iterable) {
+            System.out.println("TrafficLogSource: " + trafficLogSource.toString());
             packetCnt += trafficLogSource.packets;
         }
         // traffic state update
@@ -43,16 +47,17 @@ public class EventProcessWindowFunction extends ProcessWindowFunction<TrafficLog
             trafficLog.packets.add(packetCnt);
             trafficState.update(trafficLog);
         }
+        System.out.println("TrafficLog: " + trafficState.value().toString());
         // check time out (60min)
         boolean checkResult = checkTimeOut(context);
         if (checkResult) {
             // need to implement inference and sink logic
-            String result = callInference(trafficState.value());
+            List<Double> result = callInference(trafficState.value());
             // need to implement traffic transformation logic
 //                    inference.inference(trafficState.value());
             trafficLog = trafficState.value();
             // score update
-//            trafficLog.scores.add(result);
+            trafficLog.scores = result;
             // sink trafficLog
             collector.collect(trafficLog);
             // clear traffic state
@@ -61,7 +66,7 @@ public class EventProcessWindowFunction extends ProcessWindowFunction<TrafficLog
         }
     }
 
-    private static String callInference(TrafficLog value) {
+    private static List<Double> callInference(TrafficLog value) {
         AnomolyInference inference = new AnomolyInference();
         try {
             inference.run(transformTraffic(value));
